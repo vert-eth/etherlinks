@@ -9,6 +9,12 @@ import logo from '../img/etherlinks.png';
 
 const siteTitle = document.title;
 const defaultProvider = ethers.getDefaultProvider('rinkeby');
+const apiKey = process.env.ALCHEMY_API;
+let alchemyProvider = new AlchemyProvider("homestead", apiKey);
+
+if (alchemyProvider) {
+  console.log('- alchemy provider success');
+}
 
 // const defaultSigner = ethers.isSigner(defaultProvider);
 // console.log(defaultSigner);
@@ -26,6 +32,9 @@ const defaultProvider = ethers.getDefaultProvider('rinkeby');
 
 // I really could keep moving forwards, but I would need to make sure that everything defaults to using 
 // the jsonRPC (MetaMask)
+
+// I think I can do this with Netlify, but I will need to upgrade ($20 a month . . .)
+// Check Vercel pricing etc
 
 // CONTRACT IS LIVE: https://rinkeby.etherscan.io/address/0x92D8Ce5d7acEB460a8c494Ed42F35697649f445D
 //           LATEST: https://rinkeby.etherscan.io/address/0x3E5E7CEeFf64F97756226cb5E42520b92Fdc2915

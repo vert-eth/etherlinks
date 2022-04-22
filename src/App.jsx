@@ -59,7 +59,9 @@ const App = () => {
     return p;
   }
 
-  generalProvider = getProvider();
+  useEffect(() => {
+    generalProvider = getProvider();
+  }, [])
   
   // Get data from contract for specified address
   const getData = async () => {

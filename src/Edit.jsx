@@ -8,15 +8,20 @@ import logo from '../img/etherlinks.png';
 
 const siteTitle = document.title;
 const defaultProvider = ethers.getDefaultProvider('rinkeby');
-const apiKey = process.env.ALCHEMY_API;
+const apiKey = 12; //process.env.ALCHEMY_API;
 try {
   const alchemyProvider = new ethers.providers.AlchemyProvider('rinkeby', apiKey);
   console.log('- alchemy provider success');
   console.log(alchemyProvider);
-} catch (error) {
+} catch {
   const alchemyProvider = false;
-  console.log('- error getting alchemy provider: ', error);
+  console.log('- error getting alchemy provider');
 }
+
+// if (alchemyProvider) {
+//   console.log('- alchemy provider success');
+//   console.log(alchemyProvider);
+// }
 
 // wish there was a way to test this locally . . . needing to deploy each time sucks
 
@@ -35,37 +40,76 @@ const App = () => {
   const contractAddress = "0x3E5E7CEeFf64F97756226cb5E42520b92Fdc2915";
   const contractABI = abi.abi;
 
-  var profileData, linkData, generalProvider;
-
-  // Get fallback providers if no MetaMask or Alchemy connection
-  function getProvider() {
-    let p = defaultProvider;
+  const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
-      
-      if (ethereum) {
-        console.log('Ethereum object exists, using that');
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        p = provider;
-      } else if (alchemyProvider) {
-        console.log('Ethereum object does not exist, using Alchemy provider')
-        p = alchemyProvider;
+
+      if (!ethereum) {
+        console.log("Make sure you have metamask!");
+        return;
       } else {
-        console.log('Wallet and Alchemy providers do not exist, using default provider. Bandwidth is limited.')
+        console.log("Ethereum object exists");
+      }
+
+      const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+      if (accounts.length !== 0) {
+        const account = accounts[0];
+        console.log("Found an authorized account:", account);
+        setCurrentAccount(account)
+
+      } else {
+        console.log("No authorized account found")
+        setSiteTitle("no connected wallets");
       }
     } catch (error) {
       console.log(error);
     }
-    return p;
   }
 
-  generalProvider = getProvider();
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("This app requires MetaMask to be installed and enabled");
+        return;
+      }
+
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]); 
+
+      setSiteTitle(accounts[0]);
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get fallback providers if no MetaMask or Alchemy connection
+  function getProvider() {
+    let p = defaultProvider;
+    if (ethereum) {
+      console.log('Ethereum object exists, using that');
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      p = provider;
+    } else if (alchemyProvider) {
+      console.log('Ethereum object does not exist, using Alchemy provider')
+      p = alchemyProvider;
+    } else {
+      console.log('Wallet and Alchemy providers do not exist, using default provider. Bandwidth is limited.')
+    }
+    return p;
+  }
   
-  // Get data from contract for specified address
   const getData = async () => {
     let addr = '0x9c108F399662736C3F0A78DB655CFbC4dAD15BF2';
+
+    let prov = await getProvider();
     
-    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, generalProvider);
+    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, prov);
     console.log('got contract');
     
     const profile = await etherLinksContract.getProfile(addr);
@@ -74,31 +118,23 @@ const App = () => {
     const links = await etherLinksContract.getLinks(addr);
     console.log('got links: ', links);
 
-    setUserData(profile, links);
-
-    profileData = profile;
-    linkData = links;
-    
     return profile, links;
   }
 
   var profile, links = getData();
   
-  
+  setUserData(profile, links);
 
   const prepareUserArgs = async () => {
-    let userArgs = await getArgs();
-    console.log(userArgs.length);
+    let userArgs = getArgs();
     let addy = '555-0x251EaC00018f407723F663B418879FE22eE20E72';
-    let prov = getProvider();
-    console.log('User Arguments:  ', userArgs);
     
     if (userArgs.endsWith('.eth')) {
       console.log(userArgs);
-      addy = await prov.resolveName(userArgs);
+      addy = await defaultProvider.resolveName(userArgs);
       document.getElementById('walletText').innerHTML = addy;
       console.log(addy);
-    } else if (userArgs.startsWith('0x') && userArgs.length == 42) {
+    } else if (userArgs.startsWith('0x') && userArgs.length() == 40) {
       addy = userArgs;
       document.getElementById('walletText').innerHTML = addy;
     } else {
@@ -108,6 +144,11 @@ const App = () => {
     console.log('User supplied arguments resolve to:  %s', addy);
     return addy;
   }
+
+  useEffect(() => {
+    checkIfWalletIsConnected();
+    prepareUserArgs();
+  }, [])
 
   
   /***************/
@@ -158,9 +199,6 @@ const App = () => {
   }
 
   function setUserData(p, i) {
-    document.getElementById('userLogo').src = p[2];
-    document.getElementById('userHeader').innerHTML = p[3];
-    document.getElementById('userParagraph').innerHTML = p[4];
     console.log(p);
   }
   
@@ -173,7 +211,11 @@ const App = () => {
             <h2 id="userHeader">vert.eth</h2>
             <h4 id="walletText"></h4>
             <p id="userParagraph">I'm a passionate artist and developer building in the crypto and web3 space. Get connected below!</p>
-
+            {!currentAccount && (
+              <button className="waveButton" onClick={connectWallet}>
+                Connect wallet
+              </button>
+            )} 
           </div>
 
           <div className="linkList">
@@ -204,13 +246,5 @@ export default App;
 NOTES
 I think the next step is to take and resolve ENS? Should be relatively easy
 After that I really need to start working on the contract etc
-
-
-
-            {!currentAccount && (
-              <button className="waveButton" onClick={connectWallet}>
-                Connect wallet
-              </button>
-            )} 
 
 */

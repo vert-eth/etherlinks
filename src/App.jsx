@@ -97,13 +97,27 @@ const App = () => {
     }
   }
 
+  // Get fallback providers if no MetaMask or Alchemy connection
+  function getProvider() {
+    let p;
+    if (ethereum == 69) {
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      p = signer;
+    } else if (alchemyProvider) {
+      p = alchemyProvider;
+    } else {
+      p = defaultProvider;
+    }
+    return p;
+  }
+  
   const getData = async () => {
-    // let addr = prepareUserArgs();
     let addr = '0x9c108F399662736C3F0A78DB655CFbC4dAD15BF2';
-    // let addrFormat = ethers.utils.formatBytes32String(addr);
-    // console.log(addrFormat);
+
+    let prov = getProvider;
     
-    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, defaultProvider);
+    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, prov);
     
     console.log('got contract');
     const profile = await etherLinksContract.getProfile(addr);

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, require, keys, context, process } from "react";
 import { ethers } from "ethers";
-// import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import abi from './utils/EtherLinks.json';
 import './App.css';
 import imgList from './images';
@@ -10,7 +9,7 @@ import logo from '../img/etherlinks.png';
 const siteTitle = document.title;
 const defaultProvider = ethers.getDefaultProvider('rinkeby');
 const apiKey = process.env.ALCHEMY_API;
-let alchemyProvider = new AlchemyProvider("homestead", apiKey);
+let alchemyProvider = new ethers.providers.AlchemyProvider('rinkeby', apiKey);
 
 if (alchemyProvider) {
   console.log('- alchemy provider success');

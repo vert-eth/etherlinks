@@ -77,6 +77,30 @@ p {
   text-align: center;
 }
 
+button {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: 25px 0px 0px;
+/*   margin-bottom: 25px; */
+  font-size: 18px;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: var(--medRadius);
+  background: var(--buttonGradient);
+  background-size: 150% 150%;
+  animation: gradient 10s ease infinite;
+  opacity: 90%;
+  color: var(--greyLight-1);
+  box-shadow: var(--outShadow);
+  font-family: 'Poppins', sans-serif;
+}
+
+button:hover {
+  opacity: 100%;
+  color: var(--white);
+}
+
 .dataContainer {
   display: flex;
   justify-content: center;

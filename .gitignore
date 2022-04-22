@@ -4,3 +4,6 @@ dist
 dist-ssr
 *.local
 *.txt
+dev.log
+.env
+next.config.js

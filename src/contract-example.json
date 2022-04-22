@@ -1,0 +1,19 @@
+{
+  "HEAD": {
+    "logo": "[some image URL]",
+    "header": "vert.eth",
+    "paragraph": "Your paragraph here"
+  },
+  "BODY": {
+    "TWITTER": {
+      "link": "[some profile URL]",
+      "icon": "TWITTER",
+      "text": "Twitter"
+    },
+    "GITHUB": {
+      "link": "[some profile URL]",
+      "icon": "[some custom link]]",
+      "text": "Github"
+    }
+  }
+}

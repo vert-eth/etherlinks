@@ -8,15 +8,21 @@ import logo from '../img/etherlinks.png';
 
 const siteTitle = document.title;
 const defaultProvider = ethers.getDefaultProvider('rinkeby');
+var alchemyProvider = false;
+
 const apiKey = process.env.ALCHEMY_API;
-try {
-  const alchemyProvider = new ethers.providers.AlchemyProvider('rinkeby', apiKey);
-  console.log('- alchemy provider success');
-  console.log(alchemyProvider);
-} catch (error) {
-  const alchemyProvider = false;
-  console.log('- error getting alchemy provider: ', error);
+function getAlchemy() {
+  try {
+    alchemyProvider = new ethers.providers.AlchemyProvider('rinkeby', apiKey);
+    console.log('- alchemy provider success');
+    console.log(alchemyProvider);
+  } catch (error) {
+    console.log('- error getting alchemy provider: ', error);
+  }  
 }
+
+getAlchemy();
+
 
 // wish there was a way to test this locally . . . needing to deploy each time sucks
 
@@ -35,10 +41,11 @@ const App = () => {
   const contractAddress = "0x3E5E7CEeFf64F97756226cb5E42520b92Fdc2915";
   const contractABI = abi.abi;
 
-  var profileData, linkData, generalProvider;
+  var profileData, linkData;
 
   // Get fallback providers if no MetaMask or Alchemy connection
-  function getProvider() {
+  const getProvider = async () => {
+    console.log('Getting provider . . .');
     let p = defaultProvider;
     try {
       const { ethereum } = window;
@@ -59,15 +66,40 @@ const App = () => {
     return p;
   }
 
-  useEffect(() => {
-    generalProvider = getProvider();
-  }, [])
+  // function getProvider() {
+  //   let p = defaultProvider;
+  //   try {
+  //     const { ethereum } = window;
+      
+  //     if (ethereum) {
+  //       console.log('Ethereum object exists, using that');
+  //       const provider = new ethers.providers.Web3Provider(ethereum);
+  //       p = provider;
+  //     } else if (alchemyProvider) {
+  //       console.log('Ethereum object does not exist, using Alchemy provider')
+  //       p = alchemyProvider;
+  //     } else {
+  //       console.log('Wallet and Alchemy providers do not exist, using default provider. Bandwidth is limited.')
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   return p;
+  // }
+
+
+  
+  // useEffect(() => {
+    
+  // }, [])
   
   // Get data from contract for specified address
   const getData = async () => {
+    var prov = await getProvider();
+    
     let addr = '0x9c108F399662736C3F0A78DB655CFbC4dAD15BF2';
     
-    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, generalProvider);
+    const etherLinksContract = new ethers.Contract(contractAddress, abi.abi, prov);
     console.log('got contract');
     
     const profile = await etherLinksContract.getProfile(addr);
